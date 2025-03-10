@@ -94,6 +94,13 @@ void handle_handler_synced(int id, GeneratorHandler **handlers, int num_handlers
 
 #define SERIAL_BUFFER 5
 
+typedef void (*VoidFunc)(void);
+
+void reset_device(){
+	VoidFunc p = NULL;
+	p();
+}
+
 void loop()
 {
 	// panel_leds.step(millis());
@@ -112,7 +119,11 @@ void loop()
 		int id = buffer[0] - '0';
 		int data = (buffer[1] - '0');
 
-		if(id >= 0 && id < 4 && data >= 0 and data <= 3){
+		if(id == 3){
+			reset_device();
+		}
+
+		if(id >= 0 && id < 3 && data >= 0 and data <= 3){
 			if(handlers[id]->_state == GeneratorHandler::STATE_SYNC){
 				handle_handler_synced(id, handlers, NUM_HANDLERS, data);
 			} else {
