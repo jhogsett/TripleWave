@@ -4,7 +4,7 @@
 #include <hd44780ioClass/hd44780_I2Cexp.h> // i2c expander i/o class header
 #include <MD_AD9833.h>
 #include <SPI.h>
-#include "audio_group.h"
+#include "generator_handler.h"
 
 hd44780_I2Cexp lcd; // declare lcd object: auto locate & auto config expander chip
 
@@ -34,42 +34,42 @@ void silence(){
   // AD4.setFrequency(0, SILENT_FREQ);
 }
 
-// group IDs are 1 based
-AudioGroup group1(&lcd, &AD1, 1, 5233L, 2, 0, AudioGroup::STATE_MUTED);
-AudioGroup group2(&lcd, &AD2, 2, 6593L, 2, 0, AudioGroup::STATE_MUTED);
-AudioGroup group3(&lcd, &AD3, 3, 7939L, 2, 0, AudioGroup::STATE_MUTED);
-AudioGroup *groups[3] = {&group1, &group2, &group3};
+// handler IDs are 1 based
+GeneratorHandler handler1(&lcd, &AD1, 1, 5233L, 2, 0, GeneratorHandler::STATE_MUTED);
+GeneratorHandler handler2(&lcd, &AD2, 2, 6593L, 2, 0, GeneratorHandler::STATE_MUTED);
+GeneratorHandler handler3(&lcd, &AD3, 3, 7939L, 2, 0, GeneratorHandler::STATE_MUTED);
+GeneratorHandler *handlers[3] = {&handler1, &handler2, &handler3};
 
-void handle_group(AudioGroup * group, int data){
+void handle_handler(GeneratorHandler * handler, int data){
   switch(data){
     case 0:
       // decrement
-      group->step_frequency(-1);
+      handler->step_frequency(-1);
       break;
     case 1:
       // button press
-      group->toggle_state(groups, 3);
+      handler->toggle_state(handlers, 3);
       break;
     case 2:
       // increment
-      group->step_frequency(1);
+      handler->step_frequency(1);
       break;
     case 3:
       // button repeat
       // fader.on();
       break;
   }
-  group->show();
-  group->update_generator();
+  handler->show();
+  handler->update_generator();
 }
 
 void loop()
 {
   for(int i = 0; i < 3; i++){
-    groups[i]->show(i == 2);
+    handlers[i]->show(i == 2);
   }
 
-  groups[0]->show_sep();
+  handlers[0]->show_sep();
 
   char buffer[10];
   byte read = 0;
@@ -80,7 +80,7 @@ void loop()
     int data = (buffer[1] - '0');
 
     if(id > 0 && id < 4 && data >= 0 and data <= 3){
-      handle_group(groups[id-1], data);
+      handle_handler(handlers[id-1], data);
     }
   }
 }
