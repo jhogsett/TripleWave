@@ -9,9 +9,9 @@
 #define DEFAULT_PANEL_LEDS_BLANK_TIME	350
 
 // adjustments to match the panels LEDs to the display
-#define LED_INTENSITY1 32 // Amber panel LED matched to Green
-#define LED_INTENSITY2 32 // Green panel LED is a bit brighter than the Amber LED
-#define LED_INTENSITY3 52 // Blue panel LED?
+#define LED_INTENSITY1 20 // Amber panel LED matched to Green
+#define LED_INTENSITY2 20 // Green panel LED is a bit brighter than the Amber LED
+#define LED_INTENSITY3 32 // Blue panel LED?
 
 extern const int led_pins[];
 

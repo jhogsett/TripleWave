@@ -5,7 +5,7 @@
 #include "led_handler.h"
 #include "generator_handler.h"
 
-#define DEFAULT_SILENT_FREQ 10000000L
+#define DEFAULT_SILENT_FREQ 0L
 
 GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LEDHandler *handler, byte id, long frequency, byte step, int phase, MD_AD9833::mode_t mode, byte state){
 	_lcd = lcd;

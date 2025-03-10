@@ -8,3 +8,6 @@ maybe go: normal solo mute sync mute, repeat
 
 whether or not to use off mode
 
+allow freq to go negative to recover from sync mode end conditions
+
+on reading the buffer, consolidate multiple events for the same id
