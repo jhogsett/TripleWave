@@ -5,3 +5,6 @@ sync mode
 remember state prior to enabling sync so it can be returned to when sync no longer active
 
 maybe go: normal solo mute sync mute, repeat
+
+whether or not to use off mode
+

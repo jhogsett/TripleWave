@@ -9,7 +9,8 @@
 class GeneratorHandler
 {
 public:
-	GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LEDHandler *handler, byte id, long frequency, byte step, int phase, byte state);
+	GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LEDHandler *handler, byte id, long frequency, byte step, int phase, MD_AD9833::mode_t mode, byte state);
+	void silence();
 	void step_frequency(int steps);
 	void step_phase(int steps);
 	void step_step(int steps);
@@ -36,7 +37,6 @@ public:
 	static const long MAX_FREQUENCY = 125000000L;
 	static const int MAX_STEP = 4;
 	static const int MAX_PHASE = 3600;
-	static const int SILENT_FREQ = 0;
 	static const int HANDLER_WIDTH = 7;
 	static const int STATE_NORMAL = 0;
 	static const int STATE_MUTED = 1;
@@ -53,6 +53,11 @@ public:
 	long _frequency; // in 1/10 Hz
 	byte _step;			// in 1/10 Hz
 	int _phase;			// in 1/10 degree
+	MD_AD9833::mode_t _mode;
+	long _silent_freq;
+
+	long _last_set_freq;
+	long _last_set_phase;
 };
 
 #endif

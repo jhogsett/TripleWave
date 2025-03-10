@@ -5,7 +5,9 @@
 #include "led_handler.h"
 #include "generator_handler.h"
 
-GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LEDHandler *handler, byte id, long frequency, byte step, int phase, byte state){
+#define DEFAULT_SILENT_FREQ 10000000L
+
+GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LEDHandler *handler, byte id, long frequency, byte step, int phase, MD_AD9833::mode_t mode, byte state){
 	_lcd = lcd;
 	_generator = generator;
 	_handler = handler;
@@ -13,7 +15,17 @@ GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LE
 	_frequency = frequency;
 	_step = step;
 	_phase = phase;
+	_mode = mode;
 	_state = state;
+	_silent_freq = DEFAULT_SILENT_FREQ;
+
+	_generator->begin();
+	_generator->setMode(_mode);
+	_generator->setFrequency((MD_AD9833::channel_t)0, _silent_freq);
+}
+
+void GeneratorHandler::silence(){
+	_generator->setFrequency((MD_AD9833::channel_t)0, _silent_freq);
 }
 
 void GeneratorHandler::step_frequency(int steps){
@@ -60,7 +72,6 @@ void GeneratorHandler::switch_to_muted(byte old_state, GeneratorHandler **handle
 	if(old_state == STATE_SYNC){
 		for(int i = 0; i < num_handlers; i++){
 			if(_id != handlers[i]->_id){
-				Serial.println(i);
 				handlers[i]->_state = GeneratorHandler::STATE_MUTED;
 				handlers[i]->update_generator();
 				handlers[i]->show();
@@ -110,17 +121,24 @@ void GeneratorHandler::toggle_state(GeneratorHandler **handlers, int num_handler
 }
 
 void GeneratorHandler::update_generator(){
-switch(_state){
-	case STATE_NORMAL:
-	case STATE_SYNC:
-	case STATE_SOLO:
-	_generator->setFrequency((MD_AD9833::channel_t)0, _frequency / 10.0);
-	_generator->setPhase((MD_AD9833::channel_t)0, _phase);
-	break;
-	case STATE_MUTED:
-	_generator->setFrequency((MD_AD9833::channel_t)0, SILENT_FREQ);
-	break;
-}
+	switch(_state){
+		case STATE_NORMAL:
+		case STATE_SYNC:
+		case STATE_SOLO:
+			if(_frequency != _last_set_freq){
+				_generator->setFrequency((MD_AD9833::channel_t)0, _frequency / 10.0);
+				_last_set_freq = _frequency;
+			}
+			if(_phase != _last_set_phase){
+				_generator->setPhase((MD_AD9833::channel_t)0, _phase);
+				_last_set_phase = _phase;
+			}
+		break;
+		case STATE_MUTED:
+			_generator->setFrequency((MD_AD9833::channel_t)0, _silent_freq);
+			_last_set_freq = _silent_freq;
+			break;
+	}
 }
 
 void GeneratorHandler::decimalize(long value, char *buffer){

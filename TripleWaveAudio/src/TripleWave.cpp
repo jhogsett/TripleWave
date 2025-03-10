@@ -25,20 +25,28 @@ MD_AD9833	AD2(PIN_DATA, PIN_CLK, PIN_FSYNC2); // Arbitrary SPI pins
 MD_AD9833	AD3(PIN_DATA, PIN_CLK, PIN_FSYNC3); // Arbitrary SPI pins
 // MD_AD9833	AD4(PIN_DATA, PIN_CLK, PIN_FSYNC4); // Arbitrary SPI pins
 
-#define SILENTFREQ 100000.0
+// #define SILENTFREQ 100000.0
 
-void silence(){
-	AD1.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
-	AD2.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
-	AD3.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
-	// AD4.setFrequency(0, SILENT_FREQ);
-}
+// void silence(){
+// 	AD1.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
+// 	AD2.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
+// 	AD3.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
+// 	// AD4.setFrequency(0, SILENT_FREQ);
+// }
 
 // handler IDs are 1 based
 #define NUM_HANDLERS 3
-GeneratorHandler handler1(&lcd, &AD1, &panel_leds, 0, 5233L, 2, 0, GeneratorHandler::STATE_MUTED);
-GeneratorHandler handler2(&lcd, &AD2, &panel_leds, 1, 6593L, 2, 0, GeneratorHandler::STATE_MUTED);
-GeneratorHandler handler3(&lcd, &AD3, &panel_leds, 2, 7939L, 2, 0, GeneratorHandler::STATE_MUTED);
+
+// for portable
+// GeneratorHandler handler1(&lcd, &AD1, &panel_leds, 0, 5233L, 2, 0, MD_AD9833::MODE_SINE, GeneratorHandler::STATE_MUTED);
+// GeneratorHandler handler2(&lcd, &AD2, &panel_leds, 1, 6593L, 2, 0, MD_AD9833::MODE_SINE, GeneratorHandler::STATE_MUTED);
+// GeneratorHandler handler3(&lcd, &AD3, &panel_leds, 2, 7939L, 2, 0, MD_AD9833::MODE_SINE, GeneratorHandler::STATE_MUTED);
+
+// for desktop
+GeneratorHandler handler1(&lcd, &AD1, &panel_leds, 0, 10L, 1, 0, MD_AD9833::MODE_SQUARE1, GeneratorHandler::STATE_MUTED);
+GeneratorHandler handler2(&lcd, &AD2, &panel_leds, 1, 100L, 1, 0, MD_AD9833::MODE_SQUARE1, GeneratorHandler::STATE_MUTED);
+GeneratorHandler handler3(&lcd, &AD3, &panel_leds, 2, 1000L, 1, 0, MD_AD9833::MODE_SQUARE1, GeneratorHandler::STATE_MUTED);
+
 GeneratorHandler *handlers[NUM_HANDLERS] = {&handler1, &handler2, &handler3};
 
 void handle_handler_update(GeneratorHandler * handler, int data){
@@ -180,17 +188,17 @@ void setup()
 	lcd.createChar(3, far_dots_sep);
 	// lcd.createChar(4, far_far_dots_sep);
 
-	AD1.begin();
-	AD1.setMode(MD_AD9833::MODE_SINE);
-	AD1.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
+	// AD1.begin();
+	// AD1.setMode(MD_AD9833::MODE_SINE);
+	// AD1.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
 
-	AD2.begin();
-	AD2.setMode(MD_AD9833::MODE_SINE);
-	AD2.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
+	// AD2.begin();
+	// AD2.setMode(MD_AD9833::MODE_SINE);
+	// AD2.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
 
-	AD3.begin();
-	AD3.setMode(MD_AD9833::MODE_SINE);
-	AD3.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
+	// AD3.begin();
+	// AD3.setMode(MD_AD9833::MODE_SINE);
+	// AD3.setFrequency((MD_AD9833::channel_t)0, SILENTFREQ);
 
 	// panel_leds.activate_all();
 }
