@@ -1,17 +1,17 @@
 #include <Wire.h>
-#include <hd44780.h>                       // main hd44780 header
+#include <hd44780.h>											 // main hd44780 header
 #include <hd44780ioClass/hd44780_I2Cexp.h> // i2c expander i/o class header
 #include <MD_AD9833.h>
 #include "generator_handler.h"
 
 GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, byte id, long frequency, byte step, int phase, byte state){
-_lcd = lcd;
-_generator = generator;
-_id = id;
-_frequency = frequency;
-_step = step;
-_phase = phase;
-_state = state;
+	_lcd = lcd;
+	_generator = generator;
+	_id = id;
+	_frequency = frequency;
+	_step = step;
+	_phase = phase;
+	_state = state;
 }
 
 void GeneratorHandler::step_frequency(int steps){
