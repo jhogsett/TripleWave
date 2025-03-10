@@ -36,7 +36,7 @@ EncoderHandler encoder_handlerC(2, CLKC, DTC, SWC, PULSES_PER_DETENT);
 EncoderHandler encoder_handlerD(3, CLKD, DTD, SWD, PULSES_PER_DETENT);
 
 void setup(){
-  Serial.begin(230400);
+  Serial.begin(115200);
 }
 
 void loop() {

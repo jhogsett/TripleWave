@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 #include <hd44780.h>											 // main hd44780 header
 #include <hd44780ioClass/hd44780_I2Cexp.h> // i2c expander i/o class header
@@ -36,12 +35,13 @@ void silence(){
 }
 
 // handler IDs are 1 based
+#define NUM_HANDLERS 3
 GeneratorHandler handler1(&lcd, &AD1, &panel_leds, 0, 5233L, 2, 0, GeneratorHandler::STATE_MUTED);
 GeneratorHandler handler2(&lcd, &AD2, &panel_leds, 1, 6593L, 2, 0, GeneratorHandler::STATE_MUTED);
 GeneratorHandler handler3(&lcd, &AD3, &panel_leds, 2, 7939L, 2, 0, GeneratorHandler::STATE_MUTED);
-GeneratorHandler *handlers[3] = {&handler1, &handler2, &handler3};
+GeneratorHandler *handlers[NUM_HANDLERS] = {&handler1, &handler2, &handler3};
 
-void handle_handler(GeneratorHandler * handler, int data){
+void handle_handler_update(GeneratorHandler * handler, int data){
 	switch(data){
 		case 0:
 			// decrement
@@ -57,11 +57,39 @@ void handle_handler(GeneratorHandler * handler, int data){
 			break;
 		case 3:
 			// button repeat
-			// fader.on();
 			break;
 	}
+}
+
+void handle_handler(GeneratorHandler * handler, int data){
+	handle_handler_update(handler, data);
 	handler->show();
 	handler->update_generator();
+}
+
+#define IS_BUTTON_EVENT(x) (x == 1 || x == 3)
+#define IS_ROTATE_EVENT(x) (x == 0 || x == 1)
+
+void handle_handler_synced(int id, GeneratorHandler **handlers, int num_handlers, int data){
+	if(IS_BUTTON_EVENT(data)){
+		handle_handler_update(handlers[id], data);
+		for(int i = 0; i < num_handlers; i++){
+			handlers[i]->update_generator();
+		}
+		for(int i = 0; i < num_handlers; i++){
+			handlers[i]->show();
+		}
+	} else {
+		for(int i = 0; i < num_handlers; i++){
+			handle_handler_update(handlers[i], data);
+		}
+		for(int i = 0; i < num_handlers; i++){
+			handlers[i]->update_generator();
+		}
+		for(int i = 0; i < num_handlers; i++){
+			handlers[i]->show();
+		}
+	}
 }
 
 #define SERIAL_BUFFER 5
@@ -70,8 +98,8 @@ void loop()
 {
 	// panel_leds.step(millis());
 
-	for(int i = 0; i < 3; i++){
-		handlers[i]->show(i == 2);
+	for(int i = 0; i < NUM_HANDLERS; i++){
+		handlers[i]->show(i == NUM_HANDLERS-1);
 	}
 
 	handlers[0]->show_sep();
@@ -85,9 +113,11 @@ void loop()
 		int data = (buffer[1] - '0');
 
 		if(id >= 0 && id < 4 && data >= 0 and data <= 3){
-			panel_leds.activate_led(id);
-
-			handle_handler(handlers[id], data);
+			if(handlers[id]->_state == GeneratorHandler::STATE_SYNC){
+				handle_handler_synced(id, handlers, NUM_HANDLERS, data);
+			} else {
+				handle_handler(handlers[id], data);
+			}
 		}
 	}
 }
@@ -103,9 +133,9 @@ void setup_leds(){
 
 void setup()
 {
-	// Serial.begin(115200);
-	Serial.begin(230400);
-	Serial.setTimeout(100);
+	Serial.begin(115200);
+	// Serial.begin(230400);
+	// Serial.setTimeout(100);
 
 	setup_leds();
 

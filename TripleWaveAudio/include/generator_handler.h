@@ -14,6 +14,11 @@ public:
 	void step_phase(int steps);
 	void step_step(int steps);
 	void toggle_state(GeneratorHandler **handlers, int num_handlers=3);
+	void switch_to_normal(byte old_state, GeneratorHandler **handlers, int num_handlers);
+	void switch_to_muted(byte old_state, GeneratorHandler **handlers, int num_handlers);
+	void switch_to_solo(byte old_state, GeneratorHandler **handlers, int num_handlers);
+	void switch_to_sync(byte old_state, GeneratorHandler **handlers, int num_handlers);
+
 	void update_generator();
 	void decimalize(long value, char *buffer);
 	void show_right_aligned(byte col, byte row, const char *buffer, byte max_width);
@@ -35,9 +40,12 @@ public:
 	static const int HANDLER_WIDTH = 7;
 	static const int STATE_NORMAL = 0;
 	static const int STATE_MUTED = 1;
-	static const int STATE_SOLO = 2;
+	static const int STATE_SYNC = 2;
+	static const int STATE_SOLO = 3;
 
-private:
+	byte _state;
+
+	private:
 	hd44780_I2Cexp *_lcd;
 	MD_AD9833 *_generator;
 	LEDHandler *_handler;
@@ -45,7 +53,6 @@ private:
 	long _frequency; // in 1/10 Hz
 	byte _step;			// in 1/10 Hz
 	int _phase;			// in 1/10 degree
-	byte _state;
 };
 
 #endif

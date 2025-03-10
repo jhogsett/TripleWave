@@ -17,52 +17,102 @@ GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LE
 }
 
 void GeneratorHandler::step_frequency(int steps){
-int increment = step_to_frequency();
-_frequency += increment * steps;
-if(_frequency < 0)
-	_frequency = 0;
-while(_frequency > MAX_FREQUENCY)
-	_frequency -= MAX_FREQUENCY;
+	int increment = step_to_frequency();
+	_frequency += increment * steps;
+	if(_frequency < 0)
+		_frequency = 0;
+	while(_frequency > MAX_FREQUENCY)
+		_frequency -= MAX_FREQUENCY;
+
 }
 
 void GeneratorHandler::step_phase(int steps){
-_phase += steps;
-while(_phase < 0)
-	_phase += MAX_PHASE;
-while(_phase > MAX_PHASE)
-	_phase -= MAX_PHASE;
+	_phase += steps;
+	while(_phase < 0)
+		_phase += MAX_PHASE;
+	while(_phase > MAX_PHASE)
+		_phase -= MAX_PHASE;
 }
 
 void GeneratorHandler::step_step(int steps){
-_step += steps;
-if(_step < 0)
-	_step = 0;
-while(_step > MAX_STEP)
-	_step -= MAX_STEP;
+	_step += steps;
+	if(_step < 0)
+		_step = 0;
+	while(_step > MAX_STEP)
+		_step -= MAX_STEP;
+}
+
+void GeneratorHandler::switch_to_normal(byte old_state, GeneratorHandler **handlers, int num_handlers){
+	_state = STATE_NORMAL;
+	if(old_state == STATE_SYNC){
+		for(int i = 0; i < num_handlers; i++){
+			if(_id != handlers[i]->_id){
+				handlers[i]->_state = GeneratorHandler::STATE_NORMAL;
+				handlers[i]->update_generator();
+				handlers[i]->show();
+			}
+		}
+	}
+}
+
+void GeneratorHandler::switch_to_muted(byte old_state, GeneratorHandler **handlers, int num_handlers){
+	_state = STATE_MUTED;
+	if(old_state == STATE_SYNC){
+		for(int i = 0; i < num_handlers; i++){
+			if(_id != handlers[i]->_id){
+				Serial.println(i);
+				handlers[i]->_state = GeneratorHandler::STATE_MUTED;
+				handlers[i]->update_generator();
+				handlers[i]->show();
+			}
+		}
+	}
+}
+
+void GeneratorHandler::switch_to_solo(byte old_state, GeneratorHandler **handlers, int num_handlers){
+	_state = STATE_SOLO;
+	for(int i = 0; i < num_handlers; i++){
+		if(_id != handlers[i]->_id){
+			handlers[i]->_state = GeneratorHandler::STATE_MUTED;
+			handlers[i]->update_generator();
+			handlers[i]->show();
+		}
+	}
+}
+
+void GeneratorHandler::switch_to_sync(byte old_state, GeneratorHandler **handlers, int num_handlers){
+	_state = STATE_SYNC;
+	for(int i = 0; i < num_handlers; i++){
+		if(_id != handlers[i]->_id){
+			handlers[i]->_state = GeneratorHandler::STATE_SYNC;
+			handlers[i]->update_generator();
+			handlers[i]->show();
+		}
+	}
 }
 
 void GeneratorHandler::toggle_state(GeneratorHandler **handlers, int num_handlers){
-switch(_state){
-	case STATE_MUTED:
-	_state = STATE_NORMAL;
-	break;
-	case STATE_NORMAL:
-	_state = STATE_SOLO;
-	for(int i = 0; i < num_handlers; i++)
-		if(_id != handlers[i]->_id){
-		handlers[i]->_state = GeneratorHandler::STATE_MUTED;
-		handlers[i]->update_generator();
-		}
-	break;
-	case STATE_SOLO:
-	_state = STATE_MUTED;
-	break;
-}
+	byte old_state = _state;
+	switch(_state){
+		case STATE_MUTED:
+			switch_to_normal(old_state, handlers, num_handlers);
+			break;
+		case STATE_NORMAL:
+			switch_to_solo(old_state, handlers, num_handlers);
+			break;
+		case STATE_SOLO:
+			switch_to_sync(old_state, handlers, num_handlers);
+			break;
+		case STATE_SYNC:
+			switch_to_muted(old_state, handlers, num_handlers);
+			break;
+	}
 }
 
 void GeneratorHandler::update_generator(){
 switch(_state){
 	case STATE_NORMAL:
+	case STATE_SYNC:
 	case STATE_SOLO:
 	_generator->setFrequency((MD_AD9833::channel_t)0, _frequency / 10.0);
 	_generator->setPhase((MD_AD9833::channel_t)0, _phase);
@@ -141,14 +191,17 @@ void GeneratorHandler::show_phase(byte col, byte row, char *buffer, byte max_wid
 void GeneratorHandler::show_state(byte col, byte row, byte max_width){
 	switch(_state){
 		case STATE_NORMAL:
-		show_centered(col, row, "Norm", max_width);
-		break;
+			show_centered(col, row, "Norm", max_width);
+			break;
 		case STATE_MUTED:
-		show_centered(col, row, "Mute", max_width);
-		break;
+			show_centered(col, row, "Mute", max_width);
+			break;
+		case STATE_SYNC:
+			show_centered(col, row, "Sync", max_width);
+			break;
 		case STATE_SOLO:
-		show_centered(col, row, "Solo", max_width);
-		break;
+			show_centered(col, row, "Solo", max_width);
+			break;
 	}
 }
 
@@ -180,6 +233,9 @@ void GeneratorHandler::show_led_per_state(){
 		case STATE_MUTED:
 			_handler->deactivate_led(_id);
 		break;
+		case STATE_SYNC:
+			_handler->activate_led(_id);
+			break;
 		case STATE_SOLO:
 			_handler->activate_led(_id);
 			break;
