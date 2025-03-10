@@ -30,13 +30,13 @@
 
 #define PULSES_PER_DETENT 2
 
-EncoderHandler encoder_handlerA(1, CLKA, DTA, SWA, PULSES_PER_DETENT);
-EncoderHandler encoder_handlerB(2, CLKB, DTB, SWB, PULSES_PER_DETENT);
-EncoderHandler encoder_handlerC(3, CLKC, DTC, SWC, PULSES_PER_DETENT);
-EncoderHandler encoder_handlerD(4, CLKD, DTD, SWD, PULSES_PER_DETENT);
+EncoderHandler encoder_handlerA(0, CLKA, DTA, SWA, PULSES_PER_DETENT);
+EncoderHandler encoder_handlerB(1, CLKB, DTB, SWB, PULSES_PER_DETENT);
+EncoderHandler encoder_handlerC(2, CLKC, DTC, SWC, PULSES_PER_DETENT);
+EncoderHandler encoder_handlerD(3, CLKD, DTD, SWD, PULSES_PER_DETENT);
 
 void setup(){
-  Serial.begin(230400);
+  Serial.begin(115200);
 }
 
 void loop() {
