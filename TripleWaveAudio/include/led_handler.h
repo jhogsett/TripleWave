@@ -24,6 +24,9 @@ public:
 	void begin_flash(bool mirror, int on_time);
 	bool step_flash(unsigned long time);
 
+	void activate_led(int virtual_pin, bool mirror=false);
+	void deactivate_led(int virtual_pin, bool mirror=false);
+
 	static const int STYLE_PLAIN		= 0x00; // one LED at a time sequentially
 	static const int STYLE_RANDOM	 = 0x01; // one LED at a time randomly
 	static const int STYLE_BLANKING = 0x02; // blanking period between LED activations
@@ -38,8 +41,6 @@ public:
 	static const int DEFAULT_FLASH_TIME = 100;
 
 private:
-	void deactivate_led(int virtual_pin, bool mirror=false);
-	void activate_led(int virtual_pin, bool mirror=false);
 
 	const int *_led_pins;
 	int _num_leds;

@@ -36,9 +36,9 @@ void silence(){
 }
 
 // handler IDs are 1 based
-GeneratorHandler handler1(&lcd, &AD1, 1, 5233L, 2, 0, GeneratorHandler::STATE_MUTED);
-GeneratorHandler handler2(&lcd, &AD2, 2, 6593L, 2, 0, GeneratorHandler::STATE_MUTED);
-GeneratorHandler handler3(&lcd, &AD3, 3, 7939L, 2, 0, GeneratorHandler::STATE_MUTED);
+GeneratorHandler handler1(&lcd, &AD1, &panel_leds, 0, 5233L, 2, 0, GeneratorHandler::STATE_MUTED);
+GeneratorHandler handler2(&lcd, &AD2, &panel_leds, 1, 6593L, 2, 0, GeneratorHandler::STATE_MUTED);
+GeneratorHandler handler3(&lcd, &AD3, &panel_leds, 2, 7939L, 2, 0, GeneratorHandler::STATE_MUTED);
 GeneratorHandler *handlers[3] = {&handler1, &handler2, &handler3};
 
 void handle_handler(GeneratorHandler * handler, int data){
@@ -68,7 +68,7 @@ void handle_handler(GeneratorHandler * handler, int data){
 
 void loop()
 {
-	panel_leds.step(millis());
+	// panel_leds.step(millis());
 
 	for(int i = 0; i < 3; i++){
 		handlers[i]->show(i == 2);
@@ -84,8 +84,10 @@ void loop()
 		int id = buffer[0] - '0';
 		int data = (buffer[1] - '0');
 
-		if(id > 0 && id < 4 && data >= 0 and data <= 3){
-			handle_handler(handlers[id-1], data);
+		if(id >= 0 && id < 4 && data >= 0 and data <= 3){
+			panel_leds.activate_led(id);
+
+			handle_handler(handlers[id], data);
 		}
 	}
 }
@@ -95,8 +97,8 @@ void setup_leds(){
 		pinMode(led_pins[i], OUTPUT);
 		digitalWrite(led_pins[i], LOW);
 	}
-	unsigned long time = millis();
-	panel_leds.begin(time, LEDHandler::STYLE_RANDOM, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
+	// unsigned long time = millis();
+	// panel_leds.begin(time, LEDHandler::STYLE_RANDOM, DEFAULT_PANEL_LEDS_SHOW_TIME, DEFAULT_PANEL_LEDS_BLANK_TIME);
 }
 
 void setup()

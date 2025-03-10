@@ -2,11 +2,13 @@
 #include <hd44780.h>											 // main hd44780 header
 #include <hd44780ioClass/hd44780_I2Cexp.h> // i2c expander i/o class header
 #include <MD_AD9833.h>
+#include "led_handler.h"
 #include "generator_handler.h"
 
-GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, byte id, long frequency, byte step, int phase, byte state){
+GeneratorHandler::GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LEDHandler *handler, byte id, long frequency, byte step, int phase, byte state){
 	_lcd = lcd;
 	_generator = generator;
+	_handler = handler;
 	_id = id;
 	_frequency = frequency;
 	_step = step;
@@ -147,7 +149,7 @@ void GeneratorHandler::show_state(byte col, byte row, byte max_width){
 		case STATE_SOLO:
 		show_centered(col, row, "Solo", max_width);
 		break;
-}
+	}
 }
 
 // 0=top, 1=middle, 2=bottom
@@ -170,13 +172,28 @@ void GeneratorHandler::show_sep(){
 	_lcd->write(3);
 }
 
+void GeneratorHandler::show_led_per_state(){
+	switch(_state){
+		case STATE_NORMAL:
+			_handler->activate_led(_id);
+			break;
+		case STATE_MUTED:
+			_handler->deactivate_led(_id);
+		break;
+		case STATE_SOLO:
+			_handler->activate_led(_id);
+			break;
+	}
+}
+
 void GeneratorHandler::show(bool last_handler){
 	char buffer[10];
-	byte col = (_id - 1) * HANDLER_WIDTH;
+	byte col = (_id) * HANDLER_WIDTH;
 	byte max_width = HANDLER_WIDTH-1;
 
 	show_frequency(col, 0, buffer, max_width);
 	show_step(col, 1, buffer, max_width);
 	show_phase(col, 2, buffer, max_width);
 	show_state(col, 3, max_width);
+	show_led_per_state();
 }

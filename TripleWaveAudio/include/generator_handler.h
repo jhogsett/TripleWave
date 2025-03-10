@@ -9,7 +9,7 @@
 class GeneratorHandler
 {
 public:
-	GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, byte id, long frequency, byte step, int phase, byte state);
+	GeneratorHandler(hd44780_I2Cexp *lcd, MD_AD9833 *generator, LEDHandler *handler, byte id, long frequency, byte step, int phase, byte state);
 	void step_frequency(int steps);
 	void step_phase(int steps);
 	void step_step(int steps);
@@ -20,6 +20,7 @@ public:
 	void show_centered(byte col, byte row, const char *buffer, byte max_width);
 	void show_fixed_point_long(long value, byte col, byte row, char *buffer, byte max_width);
 	void show_frequency(byte col, byte row, char *buffer, byte max_width);
+	void show_led_per_state();
 	long step_to_frequency();
 	void show_step(byte col, byte row, char *buffer, byte max_width);
 	void show_phase(byte col, byte row, char *buffer, byte max_width);
@@ -39,6 +40,7 @@ public:
 private:
 	hd44780_I2Cexp *_lcd;
 	MD_AD9833 *_generator;
+	LEDHandler *_handler;
 	byte _id;
 	long _frequency; // in 1/10 Hz
 	byte _step;			// in 1/10 Hz

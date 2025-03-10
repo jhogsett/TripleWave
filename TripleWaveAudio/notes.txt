@@ -1,2 +1,4 @@
 idle timeout, turn off display and show panel leds in sleep mode
 
+sync mode
+
