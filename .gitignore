@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+TripleWaveAudio/.pio
+TripleWaveAudio/.vscode/
+
+TripleWaveEncoders/.pio
+TripleWaveEncoders/.vscode/
